@@ -141,21 +141,19 @@ reta:	ld	a,255 ; 0x209
 	cp	034h
 	jp	nz,0 ; 0x241
 
-; from now on we can report errors by displaying an address
-
 ; test conditional call, ret, jp, jr
 tcond:	macro	flag,pcond,ncond,rel
 	ld	hl,&flag ; 0x244
 	push	hl
 	pop	af
 	call	&pcond,lab1&pcond ; error here at 0x24c
-	jp	error
+	jp	0
 lab1&pcond:	pop	hl
 	ld	hl,0d7h xor &flag
 	push	hl
 	pop	af
 	call	&ncond,lab2&pcond
-	jp	error
+	jp	0
 lab2&pcond:	pop	hl
 	ld	hl,lab3&pcond
 	push	hl
@@ -163,36 +161,36 @@ lab2&pcond:	pop	hl
 	push	hl
 	pop	af
 	ret	&pcond
-	call	error
+	jp	0
 lab3&pcond:	ld	hl,lab4&pcond
 	push	hl
 	ld	hl,0d7h xor &flag
 	push	hl
 	pop	af
 	ret	&ncond
-	call	error
+	jp	0
 lab4&pcond:	ld	hl,&flag
 	push	hl
 	pop	af
 	jp	&pcond,lab5&pcond
-	call	error
+	jp	0
 lab5&pcond:	ld	hl,0d7h xor &flag
 	push	hl
 	pop	af
 	jp	&ncond,lab6&pcond
-	call	error
+	jp	0
 lab6&pcond:
       if	&rel
 	ld	hl,&flag
 	push	hl
 	pop	af
 	jr	&pcond,lab7&pcond
-	call	error
+	jp	0
 lab7&pcond:	ld	hl,0d7h xor &flag
 	push	hl
 	pop	af
 	jr	&ncond,lab8&pcond
-	call	error
+	jp	0
 lab8&pcond:
       endif
 	endm
@@ -205,17 +203,17 @@ lab8&pcond:
 ; test indirect jumps
 	ld	hl,lab5
 	jp	(hl)
-	call	error
+	jp	0
 lab5:	ld	hl,lab6
 	push	hl
 	pop	ix
 	jp	(ix)
-	call	error
+	jp	0
 lab6:	ld	hl,lab7
 	push	hl
 	pop	iy
 	jp	(iy)
-	call	error
+	jp	0
 
 ; djnz (and (partially) inc a, inc hl)
 lab7:	ld	a,0a5h
@@ -223,106 +221,53 @@ lab7:	ld	a,0a5h
 lab8:	rrca
 	djnz	lab8
 	cp	05ah
-	call	nz,error
+	jp	nz,0
 	ld	b,16
 lab9:	inc	a
 	djnz	lab9
 	cp	06ah
-	call	nz,error
+	jp	nz,0
 	ld	b,0
 	ld	hl,0
 lab10:	inc	hl
 	djnz	lab10
 	ld	a,h
 	cp	1
-	call	nz,error
+	jp	nz,0
 	ld	a,l
 	cp	0
-	call	nz,error ; 0x03CA (not sure)
+	jp	nz,0 ; 0x03CA (not sure)
 
 ; relative addressing
 reladr:	macro	r
 	ld	&r,hlval
 	ld	a,(&r)
 	cp	0a5h
-	call	nz,error
+	jp	nz,0
 	ld	a,(&r+1)
 	cp	03ch
-	call	nz,error
+	jp	nz,0
 	inc	&r
 	ld	a,(&r-1)
 	cp	0a5h
-	call	nz,error ; bug here => A is not 0xA5, but 0x00
+	jp	nz,0 ; bug here => A is not 0xA5, but 0x00
 	ld	&r,hlval-126
 	ld	a,(&r+127)
 	cp	03ch
-	call	nz,error
+	jp	nz,0
 	ld	&r,hlval+128
 	ld	a,(&r-128)
 	cp	0a5h
-	call	nz,error
+	jp	nz,0
 	endm
 
 	reladr	ix
 	reladr	iy
 
 allok:	ld	de,okmsg
-	ld	c,9
-	call	5
 	jp	0
 
 okmsg:	db	'Preliminary tests complete$'
-
-
-; display address at top of stack and exit
-error:	pop	bc ; 0x0465
-	ld	h,hi(hextab)
-	ld	a,b
-	rrca
-	rrca
-	rrca
-	rrca
-	and	15
-	ld	l,a
-	ld	a,(hl)
-	call	conout
-	ld	a,b
-	and	15
-	ld	l,a
-	ld	a,(hl)
-	call	conout
-	ld	a,c
-	rrca
-	rrca
-	rrca
-	rrca
-	and	15
-	ld	l,a
-	ld	a,(hl)
-	call	conout
-	ld	a,c
-	and	15
-	ld	l,a
-	ld	a,(hl)
-	call	conout
-	ld	a,13
-	call	conout
-	ld	a,10
-	call	conout
-	jp	0
-
-conout:	push	af
-	push	bc
-	push	de
-	push	hl
-	ld	c,2
-	ld	e,a
-	call	5
-	pop	hl
-	pop	de
-	pop	bc
-	pop	af
-	ret
 
 v:	set	0
 regs1:	rept	20
