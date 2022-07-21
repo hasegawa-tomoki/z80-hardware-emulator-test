@@ -31,7 +31,7 @@
 
 ; If the program runs to completion it displays a suitable message.
 
-	aseg
+	;aseg
 	org	100h
 
 start:	ld	a,1		; test simple compares and z/nz jumps
