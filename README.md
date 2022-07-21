@@ -1,9 +1,9 @@
-Test program for Z80 hardware emulator
+Test program for Z80 hardware emulator  
 https://github.com/hasegawa-tomoki/z80-hardware-emulator
 
 # Requirements
 
-zasm, asembler for the Zilog Z80 cpu.
+zasm, asembler for the Zilog Z80 cpu.  
 https://k1.spdns.de/Develop/Projects/zasm/Distributions/
 
 # Forked from
