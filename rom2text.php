@@ -21,4 +21,4 @@ while ($cursor < strlen($bytes)){
   }
 }
 
-print('}');
+print('};');
