@@ -10,6 +10,7 @@ https://k1.spdns.de/Develop/Projects/zasm/Distributions/
 
 ```
 $ zasm prelim.z80
+$ php rom2text.php|pbcopy
 ```
 
 # Forked from
