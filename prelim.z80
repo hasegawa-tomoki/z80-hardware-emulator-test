@@ -39,7 +39,8 @@
 	;aseg
 	org	100h
 
-start:	ld	a,1		; test simple compares and z/nz jumps
+start:	ld	sp,0x05ff
+	ld	a,1		; test simple compares and z/nz jumps
 	cp	2
 	jp	z,0
 	cp	1
