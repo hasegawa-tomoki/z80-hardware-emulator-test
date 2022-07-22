@@ -16,7 +16,7 @@ $ php rom2text.php|pbcopy
 # Memo
 
 ```
-$ z88dk-dis prelim.rom -o 0x100 -s 0 > prelim.dis
+$ z88dk-dis -o 0x100 prelim.rom > prelim.dis
 ```
 
 # Forked from
