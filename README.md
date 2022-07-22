@@ -9,7 +9,7 @@ https://k1.spdns.de/Develop/Projects/zasm/Distributions/
 # Usage
 
 ```
-$ zasm prelim.z80
+$ zasm -uw prelim.z80
 $ php rom2text.php|pbcopy
 ```
 
