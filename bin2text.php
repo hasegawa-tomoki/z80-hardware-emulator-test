@@ -1,5 +1,12 @@
 <?php
-$bytes = bin2hex(file_get_contents('prelim.rom'));
+if ($argc !== 2){
+  die("Usage: php bin2text.php <binary-file-name>\n");
+}
+$fileName = $argv[1];
+if (! is_file($fileName)){
+  die(sprintf("%s: file not found\n", $fileName));
+}
+$bytes = bin2hex(file_get_contents($fileName));
 
 printf("std::array<uint8_t, %d> virtual_memory{\n", 0x100 + (strlen($bytes) / 2));
 
