@@ -108,11 +108,11 @@ done:	ld	de,msg2
 	jp	0		; warm boot
 
 tests:
-;	dw	adc16
-;	dw	add16
-;	dw	add16x
-;	dw	add16y
-;	dw	alu8i
+	dw	adc16
+	dw	add16
+	dw	add16x
+	dw	add16y
+	dw	alu8i
 	dw	alu8r
 	dw	alu8rx
 	dw	alu8x
@@ -253,7 +253,15 @@ alu8r:	db	0d7h		; flag mask
 	db	0feh,043h,0b0h,016h			; expected crc
 	tmsg	'aluop a,<b,c,d,e,h,l,(hl),a>..'
 
+; 0ddh = 1101 1101  084h = 1000 0100
+; 020h = 0010 0000  039h = 0011 1001
+; 0ddh = 1101 1101  084h = 1000 0100
+; 000h = 0000 0000  001h = 0000 0001 = OK
+; 0ddh = 1101 1101  08Ch = 1000 1100
+; 000h = 0000 0000  001h = 0000 0001 = OK
 ; aluop a,<ixh,ixl,iyh,iyl> (376,832 cycles)
+;	tstr	0ddh,084h,0,0,0d6f7h,0c76eh,0accfh,02847h,022ddh,0c035h,0c5h,038h,0234bh
+;	tstr	020h,039h,0,0,0,0,0,0,0,0,0,-1,0	; (8,192 cycles)
 alu8rx:	db	0d7h		; flag mask
 	tstr	0ddh,084h,0,0,0d6f7h,0c76eh,0accfh,02847h,022ddh,0c035h,0c5h,038h,0234bh
 	tstr	020h,039h,0,0,0,0,0,0,0,0,0,-1,0	; (8,192 cycles)
@@ -261,6 +269,18 @@ alu8rx:	db	0d7h		; flag mask
 	db	0a4h,002h,06dh,05ah			; expected crc
 	tmsg	'aluop a,<ixh,ixl,iyh,iyl>.....'
 
+; 0ddh = 1101 1101  086h = 1000 0110
+; 020h = 0010 0000  038h = 0011 1000
+;                   086h = 1000 0110 OK
+;                   08eh = 1000 1110 OK
+;                   096h = 1001 0110 OK
+;                   09eh = 1001 1110 OK
+;                   0a6h = 1010 0110 OK
+;                   0aeh = 1010 1110 OK
+;                   0b6h = 1011 0110 OK
+;                   0beh = 1011 1110 OK
+;	tstr	0ddh,086h,1,0,090b7h,msbt-1,msbt-1,032fdh,0406eh,0c1dch,045h,06eh,0e5fah
+;	tstr	020h,038h,0,0,0,1,1,0,0,0,0,-1,0	; (16,384 cycles)
 ; aluop a,(<ix,iy>+1) (229,376 cycles)
 alu8x:	db	0d7h		; flag mask
 	tstr	0ddh,086h,1,0,090b7h,msbt-1,msbt-1,032fdh,0406eh,0c1dch,045h,06eh,0e5fah
@@ -301,6 +321,14 @@ cpi1:	db	0d7h		; flag mask
 	db	006h,0deh,0b3h,056h			; expected crc
 	tmsg	'cpi<r>........................'
 
+; 027h = 0010 0111
+; 018h = 0001 1000
+; 027h = 0010 0111 daa
+; 02fh = 0010 1111 cpl
+; 037h = 0011 0111 scf
+; 03fh = 0011 1111 ccf
+;	tstr	027h,0,0,0,02141h,009fah,01d60h,0a559h,08d5bh,09079h,004h,08eh,0299dh
+;	tstr	018h,0,0,0,0,0,0,0,0,0,0d7h,-1,0	; (65,536 cycles)
 ; <daa,cpl,scf,ccf>
 daaop:	db	0d7h		; flag mask
 	tstr	027h,0,0,0,02141h,009fah,01d60h,0a559h,08d5bh,09079h,004h,08eh,0299dh
@@ -589,6 +617,16 @@ ld8ix3:	db	0d7h		; flag mask
 	db	0a5h,0e9h,0ach,064h			; expected crc
 	tmsg	'ld a,(<ix,iy>+1)..............'
 
+; 0ddh = 1101 1101
+; 020h = 0010 0000 → dd, fd
+; 026h = 0010 0110
+; 008h = 0000 1000
+; dd 26
+; dd 2e
+; fd 26
+; fd 2e
+;	tstr	0ddh,026h,0,0,03c53h,04640h,0e179h,07711h,0c107h,01afah,081h,0adh,05d9bh
+;	tstr	020h,8,0,0,0,0,0,0,0,0,0,0,0		; (4 cycles)
 ; ld <ixh,ixl,iyh,iyl>,nn (32 cycles)
 ld8ixy:	db	0d7h		; flag mask
 	tstr	0ddh,026h,0,0,03c53h,04640h,0e179h,07711h,0c107h,01afah,081h,0adh,05d9bh
@@ -605,6 +643,11 @@ ld8rr:	db	0d7h		; flag mask
 	db	074h,04bh,001h,018h			; expected crc
 	tmsg	'ld <bcdehla>,<bcdehla>........'
 
+; dd 1101 1101    40 0100 0000
+; 20 0010 0000    3f 0011 1111
+; dd, fd
+;	tstr	0ddh,040h,0,0,0bcc5h,msbt,msbt,msbt,02fc2h,098c0h,083h,01fh,03bcdh
+;	tstr	020h,03fh,0,0,0,0,0,0,0,0,0,0,0		; (128 cycles)
 ; ld <b,c,d,e,ixy,a>,<b,c,d,e,ixy,a> (6912 cycles)
 ld8rrx:	db	0d7h		; flag mask
 	tstr	0ddh,040h,0,0,0bcc5h,msbt,msbt,msbt,02fc2h,098c0h,083h,01fh,03bcdh
@@ -669,6 +712,12 @@ rldop:	db	0d7h		; flag mask
 	db	095h,05bh,0a3h,026h			; expected crc
 	tmsg	'<rrd,rld>.....................'
 
+; 07 0000 0111
+; 18 0001 1000
+; 07 0000 0111 rlca
+; 0f 0000 1111 rrca
+; 17 0001 0111 rla
+; 1f 0001 1111 rra
 ; <rlca,rrca,rla,rra> (6144 cycles)
 rot8080: db	0d7h		; flag mask
 	tstr	7,0,0,0,0cb92h,06d43h,00a90h,0c284h,00c53h,0f50eh,091h,0ebh,040fch
@@ -733,6 +782,12 @@ st8ix3:	db	0d7h		; flag mask
 	db	0cch,0beh,05ah,096h			; expected crc
 	tmsg	'ld (<ix,iy>+1),a..............'
 
+; 0000 0010 : 02
+; 0001 1000 : 18
+; 0000 0010 : 02 : ld (bc), a
+; 0000 1010 : 0a : ld a, (bc)
+; 0001 0010 : 12 : ld (de), a
+; 0001 1010 : 1a : ld a, (de)
 ; ld (<bc,de>),a (96 cycles)
 stabd:	db	0d7h		; flag mask
 	tstr	2,0,0,0,00c3bh,0b592h,06cffh,0959eh,msbt,msbt+1,0c1h,021h,0bde7h
